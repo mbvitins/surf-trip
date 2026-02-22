@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Surf Trip Log</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#121a2b; --muted:#9aa7bf; --text:#eaf0ff; --accent:#5dd6ff; --accent2:#7c5cff;
+      --danger:#ff5d6c; --ok:#44e39a; --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: -apple-system,BlinkMacSystemFont,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#070c16 0%, #0b1220 35%, #0b1220 100%);
+      color:var(--text);
+    }
+    .safe{
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      min-height:100vh;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,18,32,.72);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:16px;}
+    .titleRow{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    h1{font-size:18px; margin:0; letter-spacing:.2px;}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(93,214,255,.12);
+      border:1px solid rgba(93,214,255,.22);
+      color: var(--accent);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .tabs{
+      display:flex; gap:10px; padding:12px 16px 16px; overflow:auto;
+    }
+    .tab{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding:10px 12px; border-radius:999px;
+      font-weight:600; font-size:13px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      background: linear-gradient(135deg, rgba(93,214,255,.22), rgba(124,92,255,.18));
+      border-color: rgba(93,214,255,.28);
+    }
+
+    main .grid{display:grid; grid-template-columns: 1.05fr .95fr; gap:14px; align-items:start;}
+    @media (max-width:860px){ main .grid{grid-template-columns:1fr;} }
+
+    .card{
+      background: rgba(18,26,43,.95);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .card h2{margin:0 0 10px; font-size:14px; color:#dce6ff; letter-spacing:.2px;}
+    .muted{color:var(--muted)}
+
+    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px;}
+    input, select, textarea{
+      width:100%;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-radius: 14px;
+      padding:12px 12px;
+      font-size:14px;
+      outline:none;
+    }
+    textarea{min-height:92px; resize:vertical;}
+    input:focus, select:focus, textarea:focus{border-color: rgba(93,214,255,.35); box-shadow:0 0 0 4px rgba(93,214,255,.10)}
+
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    @media (max-width:520px){ .row{grid-template-columns:1fr;} }
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
+    button{
+      border:0; border-radius: 14px; padding:12px 12px;
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-weight:700; font-size:14px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    button.primary{
+      background: linear-gradient(135deg, rgba(93,214,255,.28), rgba(124,92,255,.22));
+      border-color: rgba(93,214,255,.28);
+    }
+    button.danger{background: rgba(255,93,108,.10); border-color: rgba(255,93,108,.25); color:#ffd6da}
+    button.ok{background: rgba(68,227,154,.10); border-color: rgba(68,227,154,.22); color:#d5ffef}
+
+    .list{display:flex; flex-direction:column; gap:10px;}
+    .item{
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      padding:12px;
+    }
+    .itemTop{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+    .itemTitle{font-weight:800; font-size:14px;}
+    .itemMeta{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35;}
+    .badge{
+      font-size:12px; font-weight:800; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04);
+      color:#eaf0ff;
+      white-space:nowrap;
+    }
+    .badge.accent{border-color: rgba(93,214,255,.30); background: rgba(93,214,255,.10); color: var(--accent)}
+
+    .kpis{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    @media (max-width:520px){ .kpis{grid-template-columns:1fr;} }
+    .kpi{padding:12px; border-radius: 16px; border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03);}
+    .kpi .num{font-size:22px; font-weight:900;}
+    .kpi .lab{font-size:12px; color:var(--muted); margin-top:2px;}
+
+    .split{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    @media (max-width:760px){ .split{grid-template-columns:1fr;} }
+
+    .small{font-size:12px;}
+    .hint{font-size:12px; color: var(--muted); margin-top:8px; line-height:1.4}
+
+    .toast{
+      position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+      padding:10px 12px; border-radius: 14px;
+      background: rgba(18,26,43,.96);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      font-size:13px;
+      opacity:0; pointer-events:none;
+      transition: opacity .2s ease;
+      max-width: 92vw;
+    }
+    .toast.show{opacity:1}
+
+    details{border-radius:16px; border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); padding:10px 12px;}
+    summary{cursor:pointer; font-weight:800; font-size:13px;}
+    summary::marker{color: var(--accent)}
+
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+  </style>
+</head>
+<body>
+<div class="safe">
+  <header>
+    <div class="wrap">
+      <div class="titleRow">
+        <h1>Surf Trip Log</h1>
+        <div class="pill" id="pill">Offline · Local storage</div>
+      </div>
+    </div>
+    <div class="tabs wrap" role="tablist" aria-label="Tabs">
+      <div class="tab active" data-tab="log" role="tab" aria-selected="true">Log session</div>
+      <div class="tab" data-tab="sessions" role="tab" aria-selected="false">Sessions</div>
+      <div class="tab" data-tab="stats" role="tab" aria-selected="false">Stats</div>
+      <div class="tab" data-tab="gear" role="tab" aria-selected="false">Gear</div>
+      <div class="tab" data-tab="backup" role="tab" aria-selected="false">Backup</div>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding-bottom: 28px;">
+
+    <!-- LOG TAB -->
+    <section id="tab-log">
+      <div class="grid">
+        <div class="card">
+          <h2>New session</h2>
+          <div class="row">
+            <div>
+              <label for="date">Date</label>
+              <input id="date" type="date" />
+            </div>
+            <div>
+              <label for="time">Time (optional)</label>
+              <input id="time" type="time" />
+            </div>
+          </div>
+
+          <label for="spot">Spot</label>
+          <input id="spot" placeholder="e.g., Winkipop, Bells Beach, Uluwatu" />
+
+          <div class="row">
+            <div>
+              <label for="region">Region (optional)</label>
+              <input id="region" placeholder="e.g., Surf Coast, Indo, Maldives" />
+            </div>
+            <div>
+              <label for="waves">Waves (optional)</label>
+              <input id="waves" placeholder="e.g., 3–4ft, overhead, clean runners" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="board">Board</label>
+              <select id="board"></select>
+            </div>
+            <div>
+              <label for="fins">Fin setup</label>
+              <select id="fins"></select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="rating">Session rating (0–10)</label>
+              <input id="rating" type="number" min="0" max="10" step="1" placeholder="e.g., 8" />
+            </div>
+            <div>
+              <label>GPS</label>
+              <div class="btnrow" style="margin-top:0;">
+                <button class="ok" id="btnGPS" type="button">Use my location</button>
+                <button id="btnClearGPS" type="button">Clear</button>
+              </div>
+              <div class="hint mono" id="gpsText">—</div>
+            </div>
+          </div>
+
+          <label for="notes">Notes</label>
+          <textarea id="notes" placeholder="What happened? Tide, crowd, what worked, what didn’t…"></textarea>
+
+          <div class="btnrow">
+            <button class="primary" id="btnSave" type="button">Save session</button>
+            <button id="btnReset" type="button">Reset form</button>
+          </div>
+
+          <div class="hint">
+            Tip: On iPhone you can save this to your home screen: <span class="mono">Share → Add to Home Screen</span>.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Quick stats</h2>
+          <div class="kpis">
+            <div class="kpi"><div class="num" id="kpiTotal">0</div><div class="lab">Total sessions</div></div>
+            <div class="kpi"><div class="num" id="kpiSpots">0</div><div class="lab">Unique spots</div></div>
+            <div class="kpi"><div class="num" id="kpiTopBoard">—</div><div class="lab">Most surfed board</div></div>
+            <div class="kpi"><div class="num" id="kpiRecent">—</div><div class="lab">Most recent</div></div>
+          </div>
+
+          <div style="margin-top:12px" class="item">
+            <div class="itemTop">
+              <div>
+                <div class="itemTitle">Next: board counts</div>
+                <div class="itemMeta">Go to <b>Stats</b> to see a ranked list of your boards by usage.</div>
+              </div>
+              <div class="badge accent">Auto</div>
+            </div>
+          </div>
+
+          <details style="margin-top:10px;">
+            <summary>Built-in quiver</summary>
+            <div class="hint" style="margin-top:8px">
+              Boards and fins are preloaded from your list. You can edit the lists in the code under <span class="mono">DEFAULT_GEAR</span>.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- SESSIONS TAB -->
+    <section id="tab-sessions" style="display:none">
+      <div class="grid">
+        <div class="card">
+          <h2>Sessions</h2>
+          <div class="split">
+            <div>
+              <label for="q">Search</label>
+              <input id="q" placeholder="Search spot, board, fins, notes…" />
+            </div>
+            <div>
+              <label for="sort">Sort</label>
+              <select id="sort">
+                <option value="new">Newest first</option>
+                <option value="old">Oldest first</option>
+                <option value="rating">Highest rating</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btnrow">
+            <button class="danger" id="btnDeleteAll" type="button">Delete ALL sessions</button>
+          </div>
+
+          <div class="hint">Tap a session to edit. Swipe selection isn’t required — it’s all buttons.</div>
+        </div>
+
+        <div class="card">
+          <h2>Session list</h2>
+          <div class="list" id="sessionList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS TAB -->
+    <section id="tab-stats" style="display:none">
+      <div class="grid">
+        <div class="card">
+          <h2>Board usage</h2>
+          <div class="hint">Counts are derived from your session log.</div>
+          <div class="list" id="boardCounts"></div>
+        </div>
+
+        <div class="card">
+          <h2>Fins usage</h2>
+          <div class="hint">This is per selected fin set in each session.</div>
+          <div class="list" id="finCounts"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GEAR TAB -->
+    <section id="tab-gear" style="display:none">
+      <div class="grid">
+        <div class="card">
+          <h2>Surfboards (quiver)</h2>
+          <div class="list" id="gearBoards"></div>
+        </div>
+        <div class="card">
+          <h2>Fins</h2>
+          <div class="list" id="gearFins"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BACKUP TAB -->
+    <section id="tab-backup" style="display:none">
+      <div class="grid">
+        <div class="card">
+          <h2>Export / import</h2>
+          <div class="hint">Everything lives on your phone in local storage. Use export for backups or moving to another device.</div>
+          <div class="btnrow">
+            <button class="primary" id="btnExport" type="button">Export JSON</button>
+            <button id="btnCopy" type="button">Copy JSON</button>
+          </div>
+          <label for="backupBox">Backup JSON</label>
+          <textarea id="backupBox" class="mono" placeholder="Export appears here… paste here to import"></textarea>
+          <div class="btnrow">
+            <button class="ok" id="btnImport" type="button">Import (merge)</button>
+            <button class="danger" id="btnImportReplace" type="button">Import (replace)</button>
+          </div>
+          <details style="margin-top:10px;">
+            <summary>Privacy</summary>
+            <div class="hint" style="margin-top:8px">
+              No accounts, no server, no tracking. Your data stays on-device unless you export it.
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Danger zone</h2>
+          <div class="hint">This wipes everything (sessions). Gear remains in code.</div>
+          <div class="btnrow">
+            <button class="danger" id="btnWipe" type="button">Wipe all data</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /**********************
+   * 1) YOUR GEAR HERE
+   **********************/
+  const DEFAULT_GEAR = {
+    boards: [
+      {
+        id: crypto.randomUUID(),
+        name: "SharpEye Inferno 72",
+        dims: "6’0 × 20 1/4 × 2 13/16",
+        liters: 34.7,
+        notes: "Performance shortboard / pocket + release"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "DHD Juliette",
+        dims: "6’4 × 20 1/2 × 2 5/8",
+        liters: 35.5,
+        notes: "Maldives/Indo; refined step-up feel"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Pyzel Ghost",
+        dims: "6’6 × 20 1/2 × 3",
+        liters: 40.2,
+        notes: "Step-up; hold + confidence"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Pyzel Phantom",
+        dims: "6’6 × 21 × 3",
+        liters: 43.6,
+        notes: "Foam-forward power board"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "DHD Sandman (PU)",
+        dims: "7’0 × 21 3/4 × 3 1/16",
+        liters: 48,
+        notes: "Travel step-up; smooth PU control"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Lost RNF 96",
+        dims: "6’4 × 22 × 2 3/4",
+        liters: 43.5,
+        notes: "Speed / fun; Maldives runner"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "DHD Phoenix",
+        dims: "6’4 × 22 1/8 × 2 3/4",
+        liters: 44,
+        notes: "Hybrid; more rail than RNF"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Zak Doug Rogers",
+        dims: "7’2 × 21 3/4 × 3",
+        liters: null,
+        notes: "Mid-length glide"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Zak Con Leche",
+        dims: "8’0 × 22 × 3",
+        liters: 59,
+        notes: "Mid-length / small surf cruiser"
+      }
+    ],
+    fins: [
+      {
+        id: crypto.randomUUID(),
+        name: "FCS II Reactor Large (3)",
+        notes: "Charcoal — Inferno/Phantom; pool, beachies, Indo"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "FCS II Performer Large (5)",
+        notes: "Blue — Inferno/Phantom; all-rounder"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "DHD-MF Large (5)",
+        notes: "Blk/Wht — Inferno/Phoenix/Phantom; point/reef; Indo/Bells"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "FCS II Accelerator Medium (3)",
+        notes: "Grey/Red — Ghost/Sandman/Phantom; overhead"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Tokoro (Accel) Large (3)",
+        notes: "Blk/Wht — Phantom/Ghost/Sandman; hollow/critical"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "John John (Carver) Large (3)",
+        notes: "White — open face; Bells/Cathedral"
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "FCS II HI (Hayden) Large (5)",
+        notes: "White — mid-lengths / Zak"
+      }
+    ]
+  };
+
+  /**********************
+   * 2) STORAGE MODEL
+   **********************/
+  const KEY = "surfTripLog:v1";
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return { gear: DEFAULT_GEAR, sessions: [] };
+      const parsed = JSON.parse(raw);
+      // Merge gear if missing (sessions preserved)
+      return {
+        gear: parsed.gear?.boards?.length ? parsed.gear : DEFAULT_GEAR,
+        sessions: Array.isArray(parsed.sessions) ? parsed.sessions : []
+      };
+    } catch (e){
+      return { gear: DEFAULT_GEAR, sessions: [] };
+    }
+  }
+
+  function saveState(state){
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+
+  /**********************
+   * 3) UI HELPERS
+   **********************/
+  const $ = (id)=>document.getElementById(id);
+
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 2200);
+  }
+
+  function fmtDate(iso){
+    if(!iso) return "";
+    const d = new Date(iso);
+    if(Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+  }
+
+  function safeStr(x){
+    return (x ?? "").toString();
+  }
+
+  function getBoardById(id){
+    return state.gear.boards.find(b=>b.id===id);
+  }
+  function getFinById(id){
+    return state.gear.fins.find(f=>f.id===id);
+  }
+
+  /**********************
+   * 4) TABS
+   **********************/
+  function setTab(name){
+    document.querySelectorAll('.tab').forEach(el=>{
+      const on = el.dataset.tab === name;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    ["log","sessions","stats","gear","backup"].forEach(t=>{
+      $("tab-"+t).style.display = (t===name) ? "block" : "none";
+    });
+
+    // Refresh tab content
+    if(name==="sessions") renderSessions();
+    if(name==="stats") renderStats();
+    if(name==="gear") renderGear();
+    if(name==="backup") renderBackup();
+    if(name==="log") renderKPIs();
+  }
+
+  document.querySelectorAll('.tab').forEach(el=>{
+    el.addEventListener('click', ()=> setTab(el.dataset.tab));
+  });
+
+  /**********************
+   * 5) FORM DEFAULTS
+   **********************/
+  const todayISO = ()=>{
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  function resetForm(){
+    $("date").value = todayISO();
+    $("time").value = "";
+    $("spot").value = "";
+    $("region").value = "";
+    $("waves").value = "";
+    $("rating").value = "";
+    $("notes").value = "";
+    $("gpsText").textContent = "—";
+    $("gpsText").dataset.lat = "";
+    $("gpsText").dataset.lng = "";
+
+    // pick first items
+    if(state.gear.boards.length) $("board").value = state.gear.boards[0].id;
+    if(state.gear.fins.length) $("fins").value = state.gear.fins[0].id;
+
+    // clear editing marker
+    $("btnSave").dataset.editing = "";
+    $("btnSave").textContent = "Save session";
+  }
+
+  function populateSelects(){
+    const boardSel = $("board");
+    const finSel = $("fins");
+    boardSel.innerHTML = "";
+    finSel.innerHTML = "";
+
+    state.gear.boards.forEach(b=>{
+      const o = document.createElement('option');
+      o.value = b.id;
+      o.textContent = b.liters ? `${b.name} · ${b.liters}L` : b.name;
+      boardSel.appendChild(o);
+    });
+
+    state.gear.fins.forEach(f=>{
+      const o = document.createElement('option');
+      o.value = f.id;
+      o.textContent = f.name;
+      finSel.appendChild(o);
+    });
+  }
+
+  /**********************
+   * 6) SESSIONS CRUD
+   **********************/
+  function upsertSession(s){
+    const idx = state.sessions.findIndex(x=>x.id===s.id);
+    if(idx>=0) state.sessions[idx] = s;
+    else state.sessions.push(s);
+    saveState(state);
+  }
+
+  function deleteSession(id){
+    state.sessions = state.sessions.filter(s=>s.id!==id);
+    saveState(state);
+  }
+
+  function readFormAsSession(){
+    const date = $("date").value;
+    const time = $("time").value;
+    const spot = $("spot").value.trim();
+    const region = $("region").value.trim();
+    const waves = $("waves").value.trim();
+    const boardId = $("board").value;
+    const finsId = $("fins").value;
+    const ratingRaw = $("rating").value;
+    const rating = ratingRaw === "" ? null : Math.max(0, Math.min(10, Number(ratingRaw)));
+    const notes = $("notes").value.trim();
+    const lat = $("gpsText").dataset.lat || null;
+    const lng = $("gpsText").dataset.lng || null;
+
+    if(!date){ toast("Please pick a date"); return null; }
+    if(!spot){ toast("Please enter a spot"); return null; }
+
+    const iso = time ? `${date}T${time}:00` : `${date}T06:00:00`;
+
+    const editingId = $("btnSave").dataset.editing;
+    return {
+      id: editingId || crypto.randomUUID(),
+      createdAt: editingId ? undefined : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dateISO: iso,
+      spot, region, waves,
+      boardId, finsId,
+      rating,
+      notes,
+      gps: (lat && lng) ? { lat:Number(lat), lng:Number(lng) } : null
+    };
+  }
+
+  function fillFormFromSession(s){
+    const d = new Date(s.dateISO);
+    if(!Number.isNaN(d.getTime())){
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      $("date").value = `${yyyy}-${mm}-${dd}`;
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      // Only set time if user originally provided one (heuristic: stored time not 06:00)
+      $("time").value = (hh==="06" && mi==="00") ? "" : `${hh}:${mi}`;
+    }
+
+    $("spot").value = s.spot || "";
+    $("region").value = s.region || "";
+    $("waves").value = s.waves || "";
+    $("board").value = s.boardId;
+    $("fins").value = s.finsId;
+    $("rating").value = (s.rating ?? "");
+    $("notes").value = s.notes || "";
+
+    if(s.gps){
+      $("gpsText").textContent = `${s.gps.lat.toFixed(5)}, ${s.gps.lng.toFixed(5)}`;
+      $("gpsText").dataset.lat = s.gps.lat;
+      $("gpsText").dataset.lng = s.gps.lng;
+    } else {
+      $("gpsText").textContent = "—";
+      $("gpsText").dataset.lat = "";
+      $("gpsText").dataset.lng = "";
+    }
+
+    $("btnSave").dataset.editing = s.id;
+    $("btnSave").textContent = "Update session";
+  }
+
+  /**********************
+   * 7) RENDERERS
+   **********************/
+  function renderKPIs(){
+    const total = state.sessions.length;
+    $("kpiTotal").textContent = String(total);
+
+    const spots = new Set(state.sessions.map(s=> (s.spot||"").toLowerCase().trim()).filter(Boolean));
+    $("kpiSpots").textContent = String(spots.size);
+
+    // top board
+    const counts = new Map();
+    state.sessions.forEach(s=>{
+      counts.set(s.boardId, (counts.get(s.boardId)||0)+1);
+    });
+    let top = null;
+    for(const [bid,c] of counts.entries()){
+      if(!top || c>top.c) top = {bid, c};
+    }
+    $("kpiTopBoard").textContent = top ? `${getBoardById(top.bid)?.name || "—"} (${top.c})` : "—";
+
+    // most recent
+    const sorted = [...state.sessions].sort((a,b)=> new Date(b.dateISO)-new Date(a.dateISO));
+    $("kpiRecent").textContent = sorted[0] ? `${fmtDate(sorted[0].dateISO)} · ${sorted[0].spot}` : "—";
+  }
+
+  function renderSessions(){
+    const list = $("sessionList");
+    const q = $("q").value.trim().toLowerCase();
+    const sort = $("sort").value;
+
+    let sessions = [...state.sessions];
+
+    if(q){
+      sessions = sessions.filter(s=>{
+        const b = getBoardById(s.boardId)?.name || "";
+        const f = getFinById(s.finsId)?.name || "";
+        const blob = `${s.spot} ${s.region||""} ${s.waves||""} ${b} ${f} ${s.notes||""}`.toLowerCase();
+        return blob.includes(q);
+      });
+    }
+
+    if(sort==="new") sessions.sort((a,b)=> new Date(b.dateISO)-new Date(a.dateISO));
+    if(sort==="old") sessions.sort((a,b)=> new Date(a.dateISO)-new Date(b.dateISO));
+    if(sort==="rating") sessions.sort((a,b)=> (b.rating ?? -1) - (a.rating ?? -1));
+
+    list.innerHTML = "";
+
+    if(!sessions.length){
+      list.innerHTML = `<div class="item"><div class="itemTitle">No sessions yet</div><div class="itemMeta">Log one in the <b>Log session</b> tab.</div></div>`;
+      return;
+    }
+
+    sessions.forEach(s=>{
+      const board = getBoardById(s.boardId);
+      const fins = getFinById(s.finsId);
+
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <div class="itemTitle">${fmtDate(s.dateISO)} · ${escapeHtml(s.spot)}</div>
+            <div class="itemMeta">
+              ${escapeHtml(board?.name || "Unknown board")}
+              <span class="muted">·</span> ${escapeHtml(fins?.name || "Unknown fins")}
+              ${s.waves ? `<div class="small muted">${escapeHtml(s.waves)}</div>` : ""}
+              ${s.region ? `<div class="small muted">${escapeHtml(s.region)}</div>` : ""}
+              ${s.rating!=null ? `<div class="small">Rating: <b>${s.rating}</b>/10</div>` : ""}
+              ${s.gps ? `<div class="small muted mono">GPS: ${s.gps.lat.toFixed(5)}, ${s.gps.lng.toFixed(5)}</div>` : ""}
+              ${s.notes ? `<div class="small" style="margin-top:6px; white-space:pre-wrap;">${escapeHtml(s.notes)}</div>` : ""}
+            </div>
+          </div>
+          <div class="badge">${(s.rating!=null)? ("★".repeat(Math.max(0,Math.min(5,Math.round(s.rating/2))))) || "—" : "—"}</div>
+        </div>
+        <div class="btnrow" style="margin-top:10px;">
+          <button class="primary" data-action="edit" data-id="${s.id}">Edit</button>
+          <button data-action="duplicate" data-id="${s.id}">Duplicate</button>
+          <button class="danger" data-action="delete" data-id="${s.id}">Delete</button>
+        </div>
+      `;
+      list.appendChild(el);
+    });
+
+    // Hook buttons
+    list.querySelectorAll('button[data-action]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        const s = state.sessions.find(x=>x.id===id);
+        if(!s) return;
+
+        if(action==="edit"){
+          setTab('log');
+          fillFormFromSession(s);
+          toast("Editing session");
+        }
+        if(action==="duplicate"){
+          const copy = { ...s, id: crypto.randomUUID(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+          state.sessions.push(copy);
+          saveState(state);
+          renderSessions();
+          renderKPIs();
+          toast("Duplicated");
+        }
+        if(action==="delete"){
+          if(confirm("Delete this session?")){
+            deleteSession(id);
+            renderSessions();
+            renderKPIs();
+            toast("Deleted");
+          }
+        }
+      });
+    });
+  }
+
+  function renderStats(){
+    const bc = $("boardCounts");
+    const fc = $("finCounts");
+
+    const boardCount = new Map(state.gear.boards.map(b=>[b.id,0]));
+    const finCount = new Map(state.gear.fins.map(f=>[f.id,0]));
+
+    state.sessions.forEach(s=>{
+      boardCount.set(s.boardId, (boardCount.get(s.boardId)||0)+1);
+      finCount.set(s.finsId, (finCount.get(s.finsId)||0)+1);
+    });
+
+    const boardRows = [...boardCount.entries()]
+      .map(([id,c])=>({ id, c, b: getBoardById(id) }))
+      .sort((a,b)=> b.c - a.c);
+
+    const finRows = [...finCount.entries()]
+      .map(([id,c])=>({ id, c, f: getFinById(id) }))
+      .sort((a,b)=> b.c - a.c);
+
+    bc.innerHTML = "";
+    if(!boardRows.length){
+      bc.innerHTML = `<div class="item"><div class="itemTitle">No boards</div><div class="itemMeta">Add boards in code under DEFAULT_GEAR.</div></div>`;
+    } else {
+      boardRows.forEach(r=>{
+        const b = r.b;
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.innerHTML = `
+          <div class="itemTop">
+            <div>
+              <div class="itemTitle">${escapeHtml(b?.name || "Unknown")}</div>
+              <div class="itemMeta">${escapeHtml(b?.dims || "")}${b?.liters ? ` · ${b.liters}L` : ""}</div>
+            </div>
+            <div class="badge accent">${r.c}</div>
+          </div>
+        `;
+        bc.appendChild(el);
+      });
+    }
+
+    fc.innerHTML = "";
+    if(!finRows.length){
+      fc.innerHTML = `<div class="item"><div class="itemTitle">No fins</div><div class="itemMeta">Add fins in code under DEFAULT_GEAR.</div></div>`;
+    } else {
+      finRows.forEach(r=>{
+        const f = r.f;
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.innerHTML = `
+          <div class="itemTop">
+            <div>
+              <div class="itemTitle">${escapeHtml(f?.name || "Unknown")}</div>
+              <div class="itemMeta">${escapeHtml(f?.notes || "")}</div>
+            </div>
+            <div class="badge">${r.c}</div>
+          </div>
+        `;
+        fc.appendChild(el);
+      });
+    }
+  }
+
+  function renderGear(){
+    const gb = $("gearBoards");
+    const gf = $("gearFins");
+
+    gb.innerHTML = "";
+    state.gear.boards.forEach(b=>{
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <div class="itemTitle">${escapeHtml(b.name)}</div>
+            <div class="itemMeta">${escapeHtml(b.dims || "")} ${b.liters ? `· ${b.liters}L` : ""}</div>
+            ${b.notes ? `<div class="small muted" style="margin-top:6px">${escapeHtml(b.notes)}</div>` : ""}
+          </div>
+          <div class="badge accent">Board</div>
+        </div>
+      `;
+      gb.appendChild(el);
+    });
+
+    gf.innerHTML = "";
+    state.gear.fins.forEach(f=>{
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <div class="itemTitle">${escapeHtml(f.name)}</div>
+            ${f.notes ? `<div class="itemMeta">${escapeHtml(f.notes)}</div>` : `<div class="itemMeta muted">—</div>`}
+          </div>
+          <div class="badge">Fins</div>
+        </div>
+      `;
+      gf.appendChild(el);
+    });
+  }
+
+  function renderBackup(){
+    // nothing special, but we can prefill the textarea if empty
+    if(!$("backupBox").value.trim()){
+      $("backupBox").value = "";
+    }
+  }
+
+  /**********************
+   * 8) EVENTS
+   **********************/
+  $("btnSave").addEventListener('click', ()=>{
+    const s = readFormAsSession();
+    if(!s) return;
+
+    // preserve createdAt for edits
+    const existing = state.sessions.find(x=>x.id===s.id);
+    if(existing?.createdAt) s.createdAt = existing.createdAt;
+    if(!s.createdAt) s.createdAt = new Date().toISOString();
+
+    upsertSession(s);
+    renderKPIs();
+    toast($("btnSave").dataset.editing ? "Updated" : "Saved");
+    resetForm();
+  });
+
+  $("btnReset").addEventListener('click', ()=>{
+    resetForm();
+    toast("Reset");
+  });
+
+  $("btnGPS").addEventListener('click', async ()=>{
+    if(!navigator.geolocation){ toast("Geolocation not supported"); return; }
+    toast("Getting location…");
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        $("gpsText").textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        $("gpsText").dataset.lat = String(lat);
+        $("gpsText").dataset.lng = String(lng);
+        toast("Location saved");
+      },
+      (err)=>{
+        toast(err.message || "Location failed");
+      },
+      { enableHighAccuracy:true, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+
+  $("btnClearGPS").addEventListener('click', ()=>{
+    $("gpsText").textContent = "—";
+    $("gpsText").dataset.lat = "";
+    $("gpsText").dataset.lng = "";
+    toast("GPS cleared");
+  });
+
+  $("q").addEventListener('input', renderSessions);
+  $("sort").addEventListener('change', renderSessions);
+
+  $("btnDeleteAll").addEventListener('click', ()=>{
+    if(!state.sessions.length){ toast("No sessions to delete"); return; }
+    if(confirm("Delete ALL sessions? This cannot be undone.")){
+      state.sessions = [];
+      saveState(state);
+      renderSessions();
+      renderKPIs();
+      toast("All sessions deleted");
+    }
+  });
+
+  $("btnExport").addEventListener('click', ()=>{
+    const payload = JSON.stringify(state, null, 2);
+    $("backupBox").value = payload;
+    downloadText(payload, `surf-trip-log-${new Date().toISOString().slice(0,10)}.json`);
+    toast("Exported");
+  });
+
+  $("btnCopy").addEventListener('click', async ()=>{
+    const payload = $("backupBox").value.trim() || JSON.stringify(state, null, 2);
+    try{
+      await navigator.clipboard.writeText(payload);
+      toast("Copied");
+    } catch {
+      toast("Copy failed (try Export instead)");
+    }
+  });
+
+  function importState(mode){
+    const raw = $("backupBox").value.trim();
+    if(!raw){ toast("Paste JSON first"); return; }
+    let parsed;
+    try{ parsed = JSON.parse(raw); }
+    catch{ toast("Invalid JSON"); return; }
+
+    const incomingSessions = Array.isArray(parsed.sessions) ? parsed.sessions : [];
+
+    if(mode==="replace"){
+      state.sessions = incomingSessions;
+    } else {
+      // merge: keep existing, add new by id
+      const seen = new Set(state.sessions.map(s=>s.id));
+      incomingSessions.forEach(s=>{ if(s?.id && !seen.has(s.id)) state.sessions.push(s); });
+    }
+
+    saveState(state);
+    renderKPIs();
+    toast(mode==="replace" ? "Imported (replaced)" : "Imported (merged)");
+  }
+
+  $("btnImport").addEventListener('click', ()=> importState("merge"));
+  $("btnImportReplace").addEventListener('click', ()=>{
+    if(confirm("Replace your current session history with this import?")) importState("replace");
+  });
+
+  $("btnWipe").addEventListener('click', ()=>{
+    if(confirm("Wipe all session data on this device?")){
+      localStorage.removeItem(KEY);
+      state = { gear: DEFAULT_GEAR, sessions: [] };
+      saveState(state);
+      populateSelects();
+      resetForm();
+      renderKPIs();
+      toast("Wiped");
+    }
+  });
+
+  /**********************
+   * 9) UTIL
+   **********************/
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function escapeHtml(str){
+    return safeStr(str)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  /**********************
+   * 10) INIT
+   **********************/
+  function init(){
+    populateSelects();
+    resetForm();
+    renderKPIs();
+
+    // show iOS standalone mode in pill
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    $("pill").textContent = isStandalone ? "Installed · Offline" : "Offline · Local storage";
+
+    // Small quality-of-life: keep keyboard from hiding buttons by focusing next
+    document.addEventListener('submit', (e)=> e.preventDefault());
+  }
+
+  init();
+</script>
+</body>
+</html>
