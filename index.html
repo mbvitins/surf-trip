@@ -82,6 +82,10 @@
     textarea{min-height:92px; resize:vertical;}
     input:focus, select:focus, textarea:focus{border-color: rgba(93,214,255,.35); box-shadow:0 0 0 4px rgba(93,214,255,.10)}
 
+    /* Smaller iPhone-friendly date field */
+    .smallDate{padding:10px 12px; font-size:13px; max-width:220px;}
+
+
     .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
     @media (max-width:520px){ .row{grid-template-columns:1fr;} }
 
@@ -162,7 +166,8 @@
       </div>
     </div>
     <div class="tabs wrap" role="tablist" aria-label="Tabs">
-      <div class="tab active" data-tab="log" role="tab" aria-selected="true">Log session</div>
+      <div class="tab active" data-tab="home" role="tab" aria-selected="true">Home</div>
+      <div class="tab" data-tab="log" role="tab" aria-selected="false">Log session</div>
       <div class="tab" data-tab="sessions" role="tab" aria-selected="false">Sessions</div>
       <div class="tab" data-tab="stats" role="tab" aria-selected="false">Stats</div>
       <div class="tab" data-tab="gear" role="tab" aria-selected="false">Gear</div>
@@ -172,101 +177,10 @@
 
   <main class="wrap" style="padding-bottom: 28px;">
 
-    <!-- LOG TAB -->
-    <section id="tab-log">
+    <!-- HOME TAB -->
+    <section id="tab-home">
       <div class="grid">
-        <div class="card">
-          <h2>New session</h2>
-          <div class="row">
-            <div>
-              <label for="date">Date</label>
-              <input id="date" type="date" />
-            </div>
-            <div>
-              <label for="time">Time (optional)</label>
-              <input id="time" type="time" />
-            </div>
-          </div>
-
-          <label for="spot">Spot</label>
-          <input id="spot" placeholder="e.g., Winkipop, Bells Beach, Uluwatu" />
-
-          <div class="row">
-            <div>
-              <label for="region">Region (optional)</label>
-              <input id="region" placeholder="e.g., Surf Coast, Indo, Maldives" />
-            </div>
-            <div>
-              <label for="waves">Waves (optional)</label>
-              <input id="waves" placeholder="e.g., 3–4ft, overhead, clean runners" />
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label for="board">Board</label>
-              <select id="board"></select>
-            </div>
-            <div>
-              <label for="fins">Fin setup</label>
-              <select id="fins"></select>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label for="rating">Session rating (0–10)</label>
-              <input id="rating" type="number" min="0" max="10" step="1" placeholder="e.g., 8" />
-            </div>
-            <div>
-              <label>GPS</label>
-              <div class="btnrow" style="margin-top:0;">
-                <button class="ok" id="btnGPS" type="button">Use my location</button>
-                <button id="btnClearGPS" type="button">Clear</button>
-              </div>
-              <div class="hint mono" id="gpsText">—</div>
-            </div>
-          </div>
-
-          <label for="notes">Notes</label>
-          <textarea id="notes" placeholder="What happened? Tide, crowd, what worked, what didn’t…"></textarea>
-
-          <div class="btnrow">
-            <button class="primary" id="btnSave" type="button">Save session</button>
-            <button id="btnReset" type="button">Reset form</button>
-          </div>
-
-          <div class="hint">
-            Tip: On iPhone you can save this to your home screen: <span class="mono">Share → Add to Home Screen</span>.
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Quick stats</h2>
-          <div class="kpis">
-            <div class="kpi"><div class="num" id="kpiTotal">0</div><div class="lab">Total sessions</div></div>
-            <div class="kpi"><div class="num" id="kpiSpots">0</div><div class="lab">Unique spots</div></div>
-            <div class="kpi"><div class="num" id="kpiTopBoard">—</div><div class="lab">Most surfed board</div></div>
-            <div class="kpi"><div class="num" id="kpiRecent">—</div><div class="lab">Most recent</div></div>
-          </div>
-
-          <div style="margin-top:12px" class="item">
-            <div class="itemTop">
-              <div>
-                <div class="itemTitle">Next: board counts</div>
-                <div class="itemMeta">Go to <b>Stats</b> to see a ranked list of your boards by usage.</div>
-              </div>
-              <div class="badge accent">Auto</div>
-            </div>
-          </div>
-
-          <details style="margin-top:10px;">
-            <summary>Built-in quiver</summary>
-            <div class="hint" style="margin-top:8px">
-              Boards and fins are preloaded from your list. You can edit the lists in the code under <span class="mono">DEFAULT_GEAR</span>.
-            </div>
-          </details>
-        </div>
+        
       </div>
     </section>
 
@@ -548,7 +462,7 @@
       el.classList.toggle('active', on);
       el.setAttribute('aria-selected', on ? 'true' : 'false');
     });
-    ["log","sessions","stats","gear","backup"].forEach(t=>{
+    ["home","log","sessions","stats","gear","backup"].forEach(t=>{
       $("tab-"+t).style.display = (t===name) ? "block" : "none";
     });
 
@@ -557,6 +471,7 @@
     if(name==="stats") renderStats();
     if(name==="gear") renderGear();
     if(name==="backup") renderBackup();
+    if(name==="home") renderKPIs();
     if(name==="log") renderKPIs();
   }
 
@@ -577,8 +492,7 @@
 
   function resetForm(){
     $("date").value = todayISO();
-    $("time").value = "";
-    $("spot").value = "";
+        $("spot").value = "";
     $("region").value = "";
     $("waves").value = "";
     $("rating").value = "";
@@ -634,8 +548,7 @@
 
   function readFormAsSession(){
     const date = $("date").value;
-    const time = $("time").value;
-    const spot = $("spot").value.trim();
+        const spot = $("spot").value.trim();
     const region = $("region").value.trim();
     const waves = $("waves").value.trim();
     const boardId = $("board").value;
@@ -649,7 +562,7 @@
     if(!date){ toast("Please pick a date"); return null; }
     if(!spot){ toast("Please enter a spot"); return null; }
 
-    const iso = time ? `${date}T${time}:00` : `${date}T06:00:00`;
+    const iso = `${date}T06:00:00`;
 
     const editingId = $("btnSave").dataset.editing;
     return {
@@ -675,8 +588,7 @@
       const hh = String(d.getHours()).padStart(2,'0');
       const mi = String(d.getMinutes()).padStart(2,'0');
       // Only set time if user originally provided one (heuristic: stored time not 06:00)
-      $("time").value = (hh==="06" && mi==="00") ? "" : `${hh}:${mi}`;
-    }
+          }
 
     $("spot").value = s.spot || "";
     $("region").value = s.region || "";
@@ -1075,6 +987,13 @@
     populateSelects();
     resetForm();
     renderKPIs();
+
+    // show iOS standalone mode in pill
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    $("pill").textContent = isStandalone ? "Installed · Offline" : "Offline · Local storage";
+
+    // Default tab
+    setTab('home');
 
     // show iOS standalone mode in pill
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
